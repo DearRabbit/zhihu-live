@@ -4,7 +4,7 @@ const dialog = require('electron').dialog;
 const async = require('async');
 const path = require('path');
 const nedb = require('nedb'),
-      db = new nedb({filename: 'live.db', autoload: true, onload: (err) => {}});
+      db = new nedb({filename: path.join(__dirname, 'live.db'), autoload: true, onload: (err) => {}});
 
 const ajax = require('./ajax');
 

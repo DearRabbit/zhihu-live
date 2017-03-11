@@ -76,7 +76,7 @@ function mergeDB(localdb, srcdb, cb) {
     })
     ipcMain.on('importDatabase', function(event) {
         dialog.showOpenDialog({
-            properties: ['openFile', 'openDirectory']
+            properties: ['openFile']
         }, function (files) {
             if (files) {
                 // only process files[0]

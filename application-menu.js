@@ -49,23 +49,6 @@ function addUpdateMenuItems (items, position) {
   items.splice.apply(items, [position, 0].concat(updateItems))
 }
 
-function findReopenMenuItem () {
-  const menu = Menu.getApplicationMenu()
-  if (!menu) return
-
-  let reopenMenuItem
-  menu.items.forEach(function (item) {
-    if (item.submenu) {
-      item.submenu.items.forEach(function (item) {
-        if (item.key === 'reopenMenuItem') {
-          reopenMenuItem = item
-        }
-      })
-    }
-  })
-  return reopenMenuItem
-}
-
 if (process.platform === 'darwin') {
   const name = electron.app.getName()
   template.unshift({
@@ -102,26 +85,9 @@ if (process.platform === 'darwin') {
       }
     }]
   })
-
-  addUpdateMenuItems(template[0].submenu, 1)
-}
-
-if (process.platform === 'win32') {
-  const helpMenu = template[template.length - 1].submenu
-  addUpdateMenuItems(helpMenu, 0)
 }
 
 app.on('ready', function () {
   const menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
-})
-
-app.on('browser-window-created', function () {
-  let reopenMenuItem = findReopenMenuItem()
-  if (reopenMenuItem) reopenMenuItem.enabled = false
-})
-
-app.on('window-all-closed', function () {
-  let reopenMenuItem = findReopenMenuItem()
-  if (reopenMenuItem) reopenMenuItem.enabled = true
 })

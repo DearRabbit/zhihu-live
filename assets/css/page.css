@@ -1,0 +1,28 @@
+.section {
+  position: relative;
+  flex: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  color: var(--color-accent);
+
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+}
+
+.section-wrapper{
+  position: relative;
+  /*max-width: 740px;*/
+  height: 100%;
+
+  margin: 0 auto;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.home-button{
+  margin-bottom: 10px;
+}

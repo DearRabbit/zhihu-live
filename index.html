@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/element-ui/lib/theme-default/index.css">
+
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/global.css">
+    <link rel="stylesheet" href="assets/css/nav.css">
+    <link rel="stylesheet" href="assets/css/page.css">
+    <link rel="stylesheet" href="assets/css/chat.css">
+  </head>
+  <body>
+    <div class="main-body" id="mainBody">
+      <nav class="nav" v-show="showNav">
+        <header class="nav-header">
+          <h1 class="nav-title">Zhihu Live <strong>Archive</strong>
+              <button type="button" class="nav-header-button" @click="openHome"><i class="fa fa-home" aria-hidden="true"></i></button>
+          </h1>
+        </header>
+        <div class="nav-item nav-search">
+            <h5 class="nav-category">
+                <input type="text" v-model="searchQueryInNav" placeholder="Search...">
+            </h5>
+        </div>
+        <div class="nav-item u-category-lives">
+          <h5 class="nav-category">
+              <i class="fa fa-list nav-icon" aria-hidden="true"></i>
+              <strong>已保存的Live</strong></h5>
+          <template v-for="item in filteredInNav">
+              <button type="button" :class="['nav-button', {'is-selected': item.id == selectedID }]" :data-id="item.id" @click="openID(item.id)">
+                  {{item.subject}}</button>
+          </template>
+        </div>
+        <footer class="nav-footer">
+          <button type="button" class="nav-footer-button" @click="forfun">
+              About</button>
+        </footer>
+      </nav>
+      <main class="section">
+        <div v-if="showHomePage">
+          <!-- <div class="nav-search"><input type="text" v-model="searchQueryInHome" placeholder="Search..."></div> -->
+          <div>
+              <div class="section-wrapper">
+                  <h1>HomePage</h1>
+                  <small><i class="fa fa-bath" aria-hidden="true"></i> 没心情做些有的没的了。</small>
+              </div>
+          </div>
+          <div class="section-wrapper">
+          <el-button type="primary" @click="showImportZhihu = true" class="home-button">从zhihu导入 <i class="fa fa-cloud-download" aria-hidden="true"></i></el-button>
+          <el-button type="primary" @click="importDbList" class="home-button">从数据库导入 <i class="fa fa-database" aria-hidden="true"></i></el-button>
+          <el-button type="danger" @click="deleteConfirm" class="home-button" v-show="multipleSelection.length > 0">删除 <i class="fa fa-trash-o" aria-hidden="true"></i></el-button>
+
+          <template>
+            <el-table
+              :data="listData"
+              border
+              style="width: 100%"
+              max-height="500"
+              @selection-change="handleSelectionChange">
+              <el-table-column
+                type="selection"
+                width="45">
+              </el-table-column>
+              <el-table-column
+                prop="id"
+                label="ID"
+                width="200">
+              </el-table-column>
+              <el-table-column
+                prop="subject"
+                label="主题"
+                show-overflow-tooltip>
+              </el-table-column>
+            </el-table>
+          </template>
+          </div>
+        </div>
+        <div class="chatpage" v-if="!showHomePage">
+            <div class="section-wrapper">
+                <el-row :gutter="20">
+                    <el-col :span="16">
+                        <div class="chat-content bg-white">
+                            <div @click="externalLivePage(livePage.id)" class="MessagesHeader-header">{{livePage.subject}}</div>
+                            <div class="MessagesPageMain">
+                                <template v-for="item in livePage.message">
+                                <div :data-id="item.id" :class="['MessageItem-item', item.sender.role == 'audience' ? 'MessageItem-alignEnd' : 'MessageItem-alignStart']">
+                                    <div class="MessageItem-time">{{calcDate(item.created_at)}}</div>
+                                    <div class="MessageItem-container">
+                                        <div class="MessageItem-byline">
+                                            <div class="MessageItem-avatar"  @click="externalUserPage(item.sender.id)">
+                                                <img class="avatar-image" :srcset="item.sender.avatar" width="34px" height="34px">
+                                            </div>
+                                        </div>
+                                        <div class="MessageItem-info">
+                                            <span class="MessageItem-name">{{item.sender.name}}</span>
+                                            <div class="MessageItem-content">
+                                                <div :class="['Bubble-bubble', item.sender.role == 'audience' ? 'Bubble-grey' : 'Bubble-blue']">
+                                                    <message-attach :message="item.in_reply_to.message" v-if="item.in_reply_to"></message-attach>
+                                                    <hr class="MessageItem-split" v-if="item.in_reply_to">
+                                                    <message-attach :message="item"></message-attach>
+                                                </div>
+                                            </div>
+                                        <div>
+                                    </div>
+                                </div>
+                                </template>
+                            </div>
+                        </div>
+                    </el-col>
+                    <el-col :span="8">
+                        <div class="sidebar-content bg-white">
+                            <div @click="externalUserPage(livePage.speaker.id)" class="sidebar-section sidebar-speaker">
+                                <div class="user-avatar">
+                                    <img class="avatar-image" :srcset="livePage.speaker.avatar" width="51px" height="51px">
+                                </div>
+                                <div class="liveAuthor-info">
+                                    <div>{{livePage.speaker.name}}</div>
+                                    <span class="Label-root Label-disabled">Live 主讲人</span>
+                                </div>
+                            </div>
+                            <div class="sidebar-section">
+                                <h2 class="desc-title">Live 简介</h2>
+                                <div class="desc-content">{{livePage.description}}</div>
+                            </div>
+                        </div>
+                    </el-col>
+                </el-row>
+            </div>
+        </div>
+        <el-dialog title="从知乎导入" v-model="showImportZhihu" @close="cleanForm">
+            <el-form :model="zhihuForm">
+              <el-form-item label="用户ID" :label-width="formLabelWidth">
+                <el-input v-model="zhihuForm.userid" placeholder="我的live里面users紧接着的ID"></el-input>
+              </el-form-item>
+              <el-form-item label="Cookies z_c0" :label-width="formLabelWidth">
+                <el-input v-model="zhihuForm.z_c0" placeholder="Cookies里面的一个超长value"></el-input>
+              </el-form-item>
+            </el-form>
+            <el-table :data="importListData" max-height="250">
+                <el-table-column property="id" label="ID" width="200"></el-table-column>
+                <el-table-column property="subject" label="主题" show-overflow-tooltip></el-table-column>
+            </el-table>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="showImportZhihu = false">取消</el-button>
+                <el-button type="primary" @click="importZhihuList" :loading="zhihuListLoading">查询</el-button>
+                <el-button type="primary" @click="importZhihuData" :loading="zhihuDataLoading" v-show="showImportButton">导入</el-button>
+            </div>
+        </el-dialog>
+      </main>
+    </div>
+  </body>
+
+  <script src="assets/vue/dist/vue.js"></script>
+  <script src="assets/element-ui/lib/index.js"></script>
+  <script>
+    // You can also require other files to run in this process
+    require('./renderer')
+  </script>
+</html>

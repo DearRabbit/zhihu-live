@@ -1,0 +1,20 @@
+{
+  "name": "zhihu-live",
+  "version": "1.0.0",
+  "description": "Archive of zhihu lives",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Lee",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^1.4.1"
+  },
+  "dependencies": {
+    "async": "^2.1.5",
+    "fs": "0.0.1-security",
+    "nedb": "^1.8.0",
+    "request": "^2.80.0"
+  }
+}

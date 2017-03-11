@@ -3,12 +3,14 @@ const electron = require('electron')
 const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
+const globalShortcut = electron.globalShortcut
+const webContents = electron.webContents
 
 const path = require('path')
 const url = require('url')
 
 const mp = require('./main-process');
-const appmenu = require('./application-menu');
+// const appmenu = require('./application-menu');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -47,7 +49,26 @@ function createWindow () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready', function () {
+    createWindow();
+    // let contents = mainWindow.webContents;
+    globalShortcut.register('CmdOrCtrl+C', () => {
+        var focusedWebContents = webContents.getFocusedWebContents();
+        if (focusedWebContents) focusedWebContents['copy']();
+    });
+    globalShortcut.register('CmdOrCtrl+X', () => {
+        var focusedWebContents = webContents.getFocusedWebContents();
+        if (focusedWebContents) focusedWebContents['cut']();
+    });
+    globalShortcut.register('CmdOrCtrl+V', () => {
+        var focusedWebContents = webContents.getFocusedWebContents();
+        if (focusedWebContents) focusedWebContents['paste']();
+    });
+    globalShortcut.register('CmdOrCtrl+A', () => {
+        var focusedWebContents = webContents.getFocusedWebContents();
+        if (focusedWebContents) focusedWebContents['selectAll']();
+    });
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {

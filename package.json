@@ -4,9 +4,14 @@
   "description": "Archive of zhihu lives",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pack-mac": "electron-packager . zhihu-live --platform=darwin --arch=x64 --ignore=\\.gitignore --ignore=\".*\\.db\""
   },
   "author": "Lee",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DearRabbit/zhihu-live"
+  },
   "license": "MIT",
   "devDependencies": {
     "electron": "^1.4.1"
